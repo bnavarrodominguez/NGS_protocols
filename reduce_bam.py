@@ -32,4 +32,4 @@ call("samtools merge -u - %s_temp[123].bam | samtools sort -T %s_aln.sorted - -o
 #to index sorted bam file
 call("samtools index %s_mapped.bam" % (name), shell=True)
 
-call("rm %s_temp1.bam %s_temp2.bam %s_temp3.bam %s_aln.sorted" % (name,name,name,name), shell=True)
+call("rm %s_temp1.bam %s_temp2.bam %s_temp3.bam" % (name,name,name), shell=True)
