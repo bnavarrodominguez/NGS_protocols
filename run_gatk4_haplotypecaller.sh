@@ -46,6 +46,10 @@ samtools index $(basename $bam .bam).dedup.bam
 gatk --java-options "-Xmx10g" HaplotypeCaller \
 	-R $ref \
 	-I $(basename $bam .bam).dedup.bam \
-	-O $(basename $bam .bam).vcf.gz \
-	-ERC GVCF
+	-O $(basename $bam .bam).gvcf \
+	-ploidy 1 \
+	-ERC GVCF \
+	-variant_index_type LINEAR -variant_index_parameter 128000
+
+
 #"
