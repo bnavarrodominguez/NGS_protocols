@@ -1,6 +1,6 @@
 #!/bin/bash
-if [ "$#" -ne 2 ]; then
-	    echo "Usage: $0 sample.bam reference.fasta"
+if [ "$#" -ne 3 ]; then
+	    echo "Usage: $0 sample.bam reference.fasta ploidy"
 	            exit 2
 fi
 
@@ -8,6 +8,7 @@ fi
 
 bam=$1
 ref=$2
+p=$3
 
 ##### check reference indexes
 
@@ -55,7 +56,7 @@ else
 	-R $ref \
 	-I $(basename $bam .bam).dedup.bam \
 	-O $(basename $bam .bam).vcf.gz \
-	-ploidy 1 \
+	-ploidy $p \
 	-ERC GVCF 
 
 fi
