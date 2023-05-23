@@ -30,26 +30,34 @@ fi
 
 #### Dedup
 #echo "
+
+
+if [ -f "$(basename $bam .bam).dedup.bam" ]; then
+	echo "$(basename $bam .bam).dedup.bam exists, moving on ..."
+else
+	echo "Marking duplicates..."
 picard MarkDuplicates \
 	I=${bam} \
 	O=$(basename $bam .bam).dedup.bam \
 	METRICS_FILE= $(basename $bam .bam).dup_metrics.txt\
 	REMOVE_DUPLICATES=true \
 	VALIDATION_STRINGENCY=LENIENT AS=true 
-
-## Index the Deduped merged bam files
-#picard BuildBamIndex \
-#	I=$(basename $bam .bam).dedup.bam \
-#	VALIDATION_STRINGENCY=LENIENT
 samtools index $(basename $bam .bam).dedup.bam
+fi
+
 ## haplotype caller
-gatk --java-options "-Xmx10g" HaplotypeCaller \
+
+if [ -f "$(basename $bam .bam).vcf.gz" ]; then
+	echo "$(basename $bam .bam).vcf.gz exists, moving on ..."
+else 
+	echo "Running GATK Haplotype Caller ..."
+	gatk --java-options "-Xmx10g" HaplotypeCaller \
 	-R $ref \
 	-I $(basename $bam .bam).dedup.bam \
-	-O $(basename $bam .bam).gvcf \
+	-O $(basename $bam .bam).vcf.gz \
 	-ploidy 1 \
-	-ERC GVCF \
-	-variant_index_type LINEAR -variant_index_parameter 128000
+	-ERC GVCF 
+
+fi
 
 
-#"
