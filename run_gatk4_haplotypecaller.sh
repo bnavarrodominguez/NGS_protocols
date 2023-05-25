@@ -56,7 +56,7 @@ else
 	gatk --java-options "-Xmx10g" HaplotypeCaller \
 	-R $ref \
 	-I $(basename $bam .bam).dedup.bam \
-	-O $(basename $bam .bam).vcf.gz \
+	-O $(basename $bam .bam).${chr}.vcf.gz \
 	-ploidy $p \
 	-L $chr
 	-ERC GVCF 
