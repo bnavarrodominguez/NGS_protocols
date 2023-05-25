@@ -1,6 +1,6 @@
 #!/bin/bash
-if [ "$#" -ne 3 ]; then
-	    echo "Usage: $0 sample.bam reference.fasta ploidy"
+if [ "$#" -ne 4 ]; then
+	    echo "Usage: $0 sample.bam reference.fasta region[chr or chr:start-end] ploidy"
 	            exit 2
 fi
 
@@ -8,7 +8,8 @@ fi
 
 bam=$1
 ref=$2
-p=$3
+chr=$3
+p=$4
 
 ##### check reference indexes
 
@@ -48,8 +49,8 @@ fi
 
 ## haplotype caller
 
-if [ -f "$(basename $bam .bam).vcf.gz" ]; then
-	echo "$(basename $bam .bam).vcf.gz exists, moving on ..."
+if [ -f "$(basename $bam .bam).${chr}.vcf.gz" ]; then
+	echo "$(basename $bam .bam).${chr}.vcf.gz exists, moving on ..."
 else 
 	echo "Running GATK Haplotype Caller ..."
 	gatk --java-options "-Xmx10g" HaplotypeCaller \
@@ -57,6 +58,7 @@ else
 	-I $(basename $bam .bam).dedup.bam \
 	-O $(basename $bam .bam).vcf.gz \
 	-ploidy $p \
+	-L $chr
 	-ERC GVCF 
 
 fi

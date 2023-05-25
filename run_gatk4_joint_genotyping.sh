@@ -4,7 +4,7 @@ if [ "$#" -ne 6 ]; then
 		    	            exit 2
 fi
 
-#### The sample map (first argument) is a tab-delimited text file with sample_name--tab--path_to_sample_vcf per line.
+#### The sample map (first argument) is a tab-delimited text file with sample_name\tpath_to_sample_vcf per line.
 files=$1
 ###3 the reference fasta file
 ref=$2
