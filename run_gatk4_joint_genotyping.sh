@@ -24,7 +24,7 @@ if [ -d ${out}_database ]; then
 	echo "${out}_database already exists; moving on ..." 
 else
 echo "Importing interval $region to ${out}_database"
-	gatk --java-options "-Xmx16g -Xms16g" GenomicsDBImport \
+	gatk --java-options "-Xmx40g -Xms40g" GenomicsDBImport \
 	            --sample-name-map $files \
 	                --genomicsdb-workspace-path ${out}_database \
 	                --reader-threads $nthr \
