@@ -58,7 +58,8 @@ else
 	-I $(basename $bam .bam).dedup.bam \
 	-O $(basename $bam .bam).${chr}.vcf.gz \
 	-ploidy $p \
-	-L $chr
+	-L $chr \
+	-ERC GVCF
 
 fi
 

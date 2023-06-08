@@ -28,7 +28,7 @@ echo "Importing interval $region to ${out}_database"
 	            --sample-name-map $files \
 	                --genomicsdb-workspace-path ${out}_database \
 	                --reader-threads $nthr \
-			--intervals $region
+			-L $region
 fi
 
 #### Genotype population
@@ -42,6 +42,7 @@ else
 	   -V gendb://${out}_database \
 	   -O ${out}.all_variants.vcf.gz \
 	   --ploidy $p \
+	   -L $region \
 	   -all-sites
 fi
 
