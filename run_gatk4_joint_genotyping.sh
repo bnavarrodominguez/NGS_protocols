@@ -72,12 +72,18 @@ if [ $fhet == "yes" ]; then
 	gatk VariantFiltration \
 		-R $ref \
 		-V ${out}.snps_qc.vcf.gz \
-		-O ${out}.snps_qc_fhet.vcf.gz \
+		-O ${out}.snps_qc_fhetVF.vcf.gz \
 		--genotype-filter-expression "isHet == 1" \
 		--genotype-filter-name "isHetFilter"
+	
+	#### Convert heterozygous calls to N
+	gatk SelectVariants \
+		-V ${out}.snps_qc_fhetVF.vcf.gz \
+		--set-filtered-gt-to-nocall \
+		-O ${out}.snps_qc_fhetSV.vcf.gz
 
-	soft=${out}.snps_qc_fhet.vcf.gz
 
+	soft=${out}.snps_qc_fhetSV.vcf.gz
 
 elif [ $fhet == "no" ]; then
        echo "Not filtering heterozygous calls" 
@@ -90,7 +96,7 @@ else
 fi
 	
 echo "Hard filtering: retain only filter=PASS, biallelic and min ac =1"
-bcftools view -v snps -m2 -M2 --min-ac 1:minor -I $soft -O z -o $(basename $soft .vcf.gz).bial-mac1.hard.vcf.gz
+bcftools view -v snps -m2 -M2 -i 'F_MISSING<0.1' -f 'PASS,.' --min-ac 1:minor -I $soft -O z -o $(basename $soft .vcf.gz).bial-mac1.hard.vcf.gz
 	tabix $(basename $soft .vcf.gz).bial-mac1.hard.vcf.gz
 
 
