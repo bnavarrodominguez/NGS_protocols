@@ -46,7 +46,7 @@ else
 	   -O ${out}.all_variants.vcf.gz \
 	   --ploidy $p \
 	   -L $region \
-	   -all-sites
+	   --all-sites
 fi
 
 ########### Filtering
