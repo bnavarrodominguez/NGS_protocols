@@ -53,13 +53,13 @@ if [ -f "$(basename $bam .bam).${chr}.vcf.gz" ]; then
 	echo "$(basename $bam .bam).${chr}.vcf.gz exists, moving on ..."
 else 
 	echo "Running GATK Haplotype Caller ..."
-	gatk --java-options "-Xmx10g" HaplotypeCaller \
+	gatk --java-options "-Xmx8g" HaplotypeCaller \
 	-R $ref \
 	-I $(basename $bam .bam).dedup.bam \
 	-O $(basename $bam .bam).${chr}.vcf.gz \
 	-ploidy $p \
-	-L $chr
-	-ERC GVCF 
+	-L $chr \
+	-ERC GVCF
 
 fi
 
