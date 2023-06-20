@@ -1,6 +1,6 @@
 #!/bin/bash
-if [ "$#" -ne 6 ]; then
-		    echo "Usage: $0 map_file.txt reference.fasta out_prefix interval[chr or chr:start-stop] ploidy nthreads"
+if [ "$#" -ne 7 ]; then
+		    echo "Usage: $0 map_file.txt reference.fasta out_prefix interval[chr or chr:start-stop] ploidy nthreads filterHet[yes/no]"
 		    	            exit 2
 fi
 
@@ -17,6 +17,9 @@ nthr=$6
 #### ploidy
 p=$5
 
+#### filter het
+fhet=$7
+
 
 ## Make database
 
@@ -24,11 +27,11 @@ if [ -d ${out}_database ]; then
 	echo "${out}_database already exists; moving on ..." 
 else
 echo "Importing interval $region to ${out}_database"
-	gatk --java-options "-Xmx16g -Xms16g" GenomicsDBImport \
+	gatk --java-options "-Xmx40g -Xms40g" GenomicsDBImport \
 	            --sample-name-map $files \
 	                --genomicsdb-workspace-path ${out}_database \
 	                --reader-threads $nthr \
-			--intervals $region
+			-L $region
 fi
 
 #### Genotype population
@@ -42,13 +45,11 @@ else
 	   -V gendb://${out}_database \
 	   -O ${out}.all_variants.vcf.gz \
 	   --ploidy $p \
+	   -L $region \
 	   -all-sites
 fi
 
 ########### Filtering
-if [ -f ${out}.filtered.vcf.gz ]; then
-	echo "${out}.filtered_snps.vcf.gz already exists, moving on ..."
-else
 	echo "Excluding indels and low quality SNPs.."
 	gatk SelectVariants \
 		-R $ref \
@@ -61,13 +62,43 @@ else
 	gatk VariantFiltration \
 		-R $ref \
 		-V ${out}.all_snps.vcf.gz \
-		-O ${out}.filtered_snps.vcf.gz 	\
+		-O ${out}.snps_qc.vcf.gz 	\
 		--filter-expression "QD < 2.0 || FS > 60.0 || MQ < 40.0 ||  MappingQualityRankSum < -12.5" \
 		--filter-name "gatk_filter"
-	###### retain only biallelic snps with a min depth of 4 and max depth of 200 and where the minor allele is present in at least one individual (discard "SNPS" where all individuals are different from the reference, yet equal to each other"
-	bcftools view -v snps -m2 -M2 --min-ac 1:minor -I ${out}.filtered_snps.vcf.gz -O z -o ${out}.bialelic_mac1_filtered_snps.vcf.gz
-	tabix ${out}.bialelic_mac1_filtered_snps.vcf.gz
+	
+if [ $fhet == "yes" ]; then
+	echo "Filtering heterozygous calls"
+
+	gatk VariantFiltration \
+		-R $ref \
+		-V ${out}.snps_qc.vcf.gz \
+		-O ${out}.snps_qc_fhetVF.vcf.gz \
+		--genotype-filter-expression "isHet == 1" \
+		--genotype-filter-name "isHetFilter"
+	
+	#### Convert heterozygous calls to N
+	gatk SelectVariants \
+		-V ${out}.snps_qc_fhetVF.vcf.gz \
+		--set-filtered-gt-to-nocall \
+		-O ${out}.snps_qc_fhetSV.vcf.gz
 
 
+	soft=${out}.snps_qc_fhetSV.vcf.gz
+
+elif [ $fhet == "no" ]; then
+       echo "Not filtering heterozygous calls" 
+	soft=${out}.snps_qc.vcf.gz
+else 
+	echo "Filter heterozygous calls value not valid"	
+	echo "Not filtering heterozygous calls" 
+	soft=${out}.snps_qc.vcf.gz
 
 fi
+	
+echo "Hard filtering: retain only filter=PASS, biallelic and min ac =1"
+bcftools view -v snps -m2 -M2 -i 'F_MISSING<0.1' -f 'PASS,.' --min-ac 1:minor -I $soft -O z -o $(basename $soft .vcf.gz).bial-mac1.hard.vcf.gz
+	tabix $(basename $soft .vcf.gz).bial-mac1.hard.vcf.gz
+
+
+
+
