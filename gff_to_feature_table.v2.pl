@@ -24,6 +24,7 @@ my $usage = <<USAGE;
   Reads from stdin and writes to stdout.
 
   Mark Stenglein,  3/6/2018
+  Modified Beatriz Navarro, 4/25/2024
 
   Usage: $0 [-h] 
 
