@@ -82,9 +82,10 @@ while (<>)
       if ($name =~ /Name=([^;]+)/)
       {
          $name = $1;
-	 # strip "CDS" or "_CDS" from name
+	 # strip "CDS" or "_CDS" or "gene" from name
          $name =~ s/_CDS//;
          $name =~ s/ CDS//;
+         $name =~ s/ gene//;
 	 # if name contains 
          if ($name =~ /partial/)
          {
@@ -97,7 +98,7 @@ while (<>)
       }
 
       # handle CDS or mat_peptide feature types
-      if (($type eq "CDS") or ($type eq "tRNA") or ($type eq "gene"))
+      if (($type eq "CDS") or ($type eq "tRNA") or ($type eq "gene") or ($type eq "rRNA"))
       {
          my $seq_length = length($seq_lengths{$seq_id});
 
@@ -123,13 +124,21 @@ while (<>)
 	    # CDS ends within sequence
 	    print  "$end\t"; 
 	 }
+	 
 
 	 # type of feature
          print "$type\n";
 
+	 # genes
+	 if ($type eq "gene")
+	 {
+	 print "\t\t\tgene\t$name\n"
+	 }
+	 else
+	 {
 	 # name of product
          print "\t\t\tproduct\t$name\n";
-
+         }
 	 # if the CDS name includes "partial" make a note of that
          if ($partial) 
          { 
