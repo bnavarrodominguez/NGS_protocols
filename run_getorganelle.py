@@ -8,7 +8,7 @@ from glob import glob
 from Bio import SeqIO
 
 def usage():
-    print("Usage: run_getorganelle.py NumberOfReads ListOfFiles Reference Prefix Threads")
+    print("Usage: run_getorganelle.py NumberOfReads ListOfFiles Reference Prefix Threads ")
     sys.exit(1)
 
 # Parse command-line arguments
